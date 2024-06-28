@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 from datetime import datetime, timedelta
+import pickle
 
 def aggiungi_task():
     task = txt_input.get()
@@ -59,6 +60,25 @@ def ordina_task():
     items_sorted = sorted(items, key=lambda x: tree.item(x, 'text'))
     for index, item in enumerate(items_sorted):
         tree.move(item, '', index)
+
+def salva_task():
+    items = tree.get_children('')
+    tasks = []
+    for item in items:
+        task = tree.item(item, 'text')
+        comment, scadenza = tree.item(item, 'values')
+        tasks.append((task, comment, scadenza))
+    with open('tasks.pkl', 'wb') as f:
+        pickle.dump(tasks, f)
+
+def carica_task():
+    try:
+        with open('tasks.pkl', 'rb') as f:
+            tasks = pickle.load(f)
+        for task, comment, scadenza in tasks:
+            tree.insert('', 'end', text=task, values=(comment, scadenza))
+    except FileNotFoundError:
+        pass
 
 window = tk.Tk()
 window.title("Gestore di Attività")
@@ -122,4 +142,13 @@ btn_del_task.pack(side=tk.LEFT)
 btn_mod_task = tk.Button(frame_buttons_bottom, text="Modifica task", command=modifica_task, background="blue", font=('Helvetica', 14))
 btn_mod_task.pack(side=tk.LEFT)
 
+# Aggiungi questi pulsanti al tuo codice
+btn_salva_task = tk.Button(frame_buttons_bottom, text="Salva task", command=salva_task, background="blue", font=('Helvetica', 14))
+btn_salva_task.pack(side=tk.LEFT)
+
+btn_carica_task = tk.Button(frame_buttons_bottom, text="Carica task", command=carica_task, background="green", font=('Helvetica', 14))
+btn_carica_task.pack(side=tk.LEFT)
+
+
 window.mainloop()
+
